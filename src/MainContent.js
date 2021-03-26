@@ -1,8 +1,10 @@
 import React from "react";
 //import Particle from "particle-api-js";
-import { Layout, Row, Col, Menu, Input } from 'antd';
+import {Layout, Row, Col, Menu, Input, Button} from 'antd';
+import { Typography } from 'antd';
 
-const { Header, Footer, Content } = Layout;
+const { Title } = Typography
+const { Header, Content } = Layout;
 
 const MainContent = () => {
 
@@ -10,29 +12,48 @@ const MainContent = () => {
     var particle = new Particle();
     //var token;
 
-    const [variableData, setVariables] = React.useState([]);
     const [token, setToken] = React.useState();
-    const [inputValue, setInputValue] = React.useState();
+    const [email, setEmail] = React.useState();
+    const [password, setPassword] = React.useState();
 
-    const handleChange = (e) => {
+    const handleEmail = (e) => {
 
         console.log(e.target.value);
+        setEmail(e.target.value);
     }
+
+    const handlePass = (e) => {
+
+        setPassword(e.target.value);
+    }
+
 
     React.useEffect(() => {
 
-        particle.login({username: 'itwabi@gmail.com', password: 'jaggerjackgrimm123'}).then(
-            function(data) {
-                setToken(data.body.access_token);
 
-                //console.log(data);
+    }, [particle]);
 
-            },
-            function (err) {
-                console.log('Could not log in.', err);
-            }
-        );
-    }, [particle])
+    const handleLogin = () => {
+
+        if((email == null) || (password == null)){
+            alert("Fields cannot be left empty!");
+        } else {
+
+            particle.login({username: email, password: password})
+                .then(
+                function(data) {
+                    setToken(data.body.access_token);
+
+                    //console.log(data);
+
+                },
+                function (err) {
+                    console.log('Could not log in.', err);
+                }
+            );
+
+        }
+    }
 
     return(
         <div>
@@ -40,33 +61,34 @@ const MainContent = () => {
                 <Header>
                     <div className="logo" />
                     <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']}>
-                        <Menu.Item key="1">nav 1</Menu.Item>
-                        <Menu.Item key="2">nav 2</Menu.Item>
-                        <Menu.Item key="3">nav 3</Menu.Item>
+                        <Title className="text-white" level={1}>Particle Devices</Title>
                     </Menu>
                 </Header>
                 <Content>
-                    <Row>
+                    <Row className="d-flex justify-content-center align-items-center">
+                        <Col span={10}>
+                                <Title className="my-4" level={2}>Log In</Title>
 
-                        <Col span={14}>
-                            <Content
-                                className="site-layout-background d-flex align-items-center"
-                                style={{
-                                    padding: 24,
-                                    margin: 0,
-                                    minHeight: 280,
-                                }}>
                                 <Input
-                                    placeholder="Basic usage"
-                                    value={inputValue}
-                                    onChange={handleChange}
+                                    className="mt-3 mb-1 mx-3"
+                                    placeholder="enter particle email"
+                                    value={email}
+                                    onChange={handleEmail}
                                 />
-                            </Content>
+                                <Input
+                                    className="mt-1 mb-3 mx-3"
+                                    placeholder="enter particle password"
+                                    value={password}
+                                    onChange={handlePass}
+                                />
+                                <Button
+                                    onClick={handleLogin}
+                                    className="my-3 mx-3"
+                                    type="primary">Get Devices</Button>
 
                         </Col>
                     </Row>
                 </Content>
-                <Footer>Footer</Footer>
             </Layout>
         </div>
     );

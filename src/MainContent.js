@@ -59,6 +59,31 @@ const MainContent = () => {
                     devicesPr.then(
                         function(devices){
                             console.log('Devices: ', devices);
+                            //setDevices(devices.body);
+                            var tempArray = [];
+                            devices.body.map((device) => {
+                                var temp = {};
+                                temp.name = device.name;
+                                temp.id = device.id;
+                                temp.status = device.status;
+                                temp.last_heard = device.last_heard;
+
+                                particle.getVariable({ deviceId: device.id, name: 'distance', auth: token }).then(function(data) {
+                                    console.log('distance:', data);
+                                    device.distance = data;
+                                    temp.distance = data;
+                                }, function(err) {
+                                    console.log('An error occurred while getting attrs:', err);
+                                });
+
+                                particle.getVariable({ deviceId: device.id, name: 'STU', auth: token }).then(function(data) {
+                                    console.log('GPS value:', data);
+                                    device.STU = data;
+                                    temp.STU = data;
+                                }, function(err) {
+                                    console.log('An error occurred while getting attrs:', err);
+                                });
+                            });
                             setDevices(devices.body);
                         },
                         function(err) {

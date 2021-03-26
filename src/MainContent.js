@@ -1,6 +1,6 @@
 import React from "react";
 //import Particle from "particle-api-js";
-import {Layout, Row, Col, Menu, Input, Button} from 'antd';
+import {Layout, Row, Col, Menu, Input, Button, List, Card} from 'antd';
 import { Typography } from 'antd';
 
 const { Title } = Typography
@@ -10,28 +10,36 @@ const MainContent = () => {
 
     var Particle = require('particle-api-js');
     var particle = new Particle();
-    //var token;
+    var token;
 
-    const [token, setToken] = React.useState();
+    //const [token, setToken] = React.useState();
     const [email, setEmail] = React.useState();
     const [password, setPassword] = React.useState();
+    const [loggedIn, setLoggedIn] = React.useState(false);
+    const [deviceArray, setDevices] = React.useState([]);
+
+    const data = [
+        {
+            title: 'Ant Design Title 1',
+        },
+        {
+            title: 'Ant Design Title 2',
+        },
+        {
+            title: 'Ant Design Title 3',
+        },
+        {
+            title: 'Ant Design Title 4',
+        },
+    ];
 
     const handleEmail = (e) => {
-
-        console.log(e.target.value);
         setEmail(e.target.value);
     }
 
     const handlePass = (e) => {
-
         setPassword(e.target.value);
     }
-
-
-    React.useEffect(() => {
-
-
-    }, [particle]);
 
     const handleLogin = () => {
 
@@ -42,9 +50,22 @@ const MainContent = () => {
             particle.login({username: email, password: password})
                 .then(
                 function(data) {
-                    setToken(data.body.access_token);
+                    setLoggedIn(true);
+                    token = (data.body.access_token);
 
                     //console.log(data);
+                    var devicesPr = particle.listDevices({ auth: token });
+
+                    devicesPr.then(
+                        function(devices){
+                            console.log('Devices: ', devices);
+                            setDevices(devices.body);
+                        },
+                        function(err) {
+                            console.log('List devices call failed: ', err);
+                            alert('List devices call failed: ' + err);
+                        }
+                    );
 
                 },
                 function (err) {
@@ -67,24 +88,50 @@ const MainContent = () => {
                 <Content>
                     <Row className="d-flex justify-content-center align-items-center">
                         <Col span={10}>
-                                <Title className="my-4" level={2}>Log In</Title>
+                            { !loggedIn ?
 
-                                <Input
-                                    className="mt-3 mb-1 mx-3"
-                                    placeholder="enter particle email"
-                                    value={email}
-                                    onChange={handleEmail}
-                                />
-                                <Input
-                                    className="mt-1 mb-3 mx-3"
-                                    placeholder="enter particle password"
-                                    value={password}
-                                    onChange={handlePass}
-                                />
-                                <Button
-                                    onClick={handleLogin}
-                                    className="my-3 mx-3"
-                                    type="primary">Get Devices</Button>
+                                    <div>
+                                        <Title className="my-4" level={2}>Log In</Title>
+
+                                        <Input
+                                            className="mt-3 mb-1 mx-3"
+                                            placeholder="enter particle email"
+                                            value={email}
+                                            onChange={handleEmail}
+                                        />
+                                        <Input.Password
+                                            className="mt-1 mb-3 mx-3"
+                                            placeholder="enter particle password"
+                                            value={password}
+                                            onChange={handlePass}
+                                        />
+                                        <Button
+                                            onClick={handleLogin}
+                                            className="my-3 mx-3"
+                                            type="primary">Get Devices</Button>
+                                    </div>
+
+                                :
+
+                                <div>
+                                    <Title className="my-4" level={2}>Your Devices</Title>
+                                    <List
+                                        itemLayout="horizontal">
+                                        {deviceArray && deviceArray.map((item, key) => (
+                                            <List.Item key={key}>
+                                                <Card title={item.name} style={{ width: "100%" }}>
+                                                    <p>Device ID : {item.id}</p>
+                                                    <p>Status : {item.status}</p>
+                                                    <p>Last Heard : {item.last_heard}</p>
+                                                    <Card type="inner" title="Variables" extra={<a href="#">More</a>}>
+                                                        <p>Distance : {item.variables.distance}</p>
+                                                        <p>STU : {item.variables.STU}</p>
+                                                    </Card>
+                                                </Card>
+                                            </List.Item>
+                                        ))}
+                                    </List>
+                                </div>}
 
                         </Col>
                     </Row>

@@ -1,9 +1,20 @@
 import React, {useState, useEffect} from "react";
-import {Button, Card, Layout, List, Typography} from "antd";
+import {Button, Card, Layout, List, Modal, Typography} from "antd";
 import Firebase from "./Firebase";
-import {MDBBox, MDBCard, MDBCardTitle, MDBCol, MDBContainer, MDBIcon, MDBRow} from "mdbreact";
+import {
+    MDBBox,
+    MDBBtn,
+    MDBCard,
+    MDBCardBody,
+    MDBCardTitle,
+    MDBCol,
+    MDBContainer,
+    MDBIcon,
+    MDBInput,
+    MDBRow
+} from "mdbreact";
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
-
+import Select from 'react-select';
 
 
 const { Title } = Typography
@@ -13,14 +24,38 @@ mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worke
 mapboxgl.accessToken = "pk.eyJ1IjoidHdhYmkiLCJhIjoiY2tlZnZyMWozMHRqdjJzb3k2YzlxZnloYSJ9.FBL3kyXAQ22kEws-y6XbJQ";
 
 var devicesRef = Firebase.database().ref("particle-devices/");
+var cansRef = Firebase.database().ref("Trash-cans/");
 const FirebaseContent = () => {
 
     const [deviceArray, setDeviceArray] = useState([]);
+    const [canArray, setCanArray] = useState([]);
     const mapContainer = React.useRef(null);
     const [lng, setLng] = useState(35.0168);
     const [lat, setLat] = useState(-15.7667);
     const [zoom, setZoom] = useState(12);
+    const [showEdit, setShowEdit] = useState(false);
+    const [selectedDevice, setSelectedDevice] = useState(null);
+    const [visible, setVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [editID, setEditID] = useState(null);
 
+
+    const handleDevice = (selectedOption) => {
+        setSelectedDevice(selectedOption);
+    };
+
+    const handleModal = () => {
+        setVisible(!visible);
+    };
+
+    const getTrashcans = () => {
+        setCanArray([]);
+        cansRef.on("child_added", function (snapshot) {
+            var device = snapshot.val();
+            device.label = device.canName;
+            setCanArray(canArray => [...canArray, device]);
+        });
+    }
 
 
     useEffect(() => {
@@ -31,21 +66,18 @@ const FirebaseContent = () => {
             center: [lng, lat],
             zoom: zoom
         });
-        var tempArray = [];
 
         setDeviceArray([])
         devicesRef.on("child_added", function (snapshot) {
             var device = snapshot.val();
 
-            tempArray.push(device);
-
+            device.label = device.coreid;
             console.log(device);
-            //setDeviceArray(tempArray);
             setDeviceArray(deviceArray => [...deviceArray, device]);
         });
 
-        console.log(tempArray)
 
+       getTrashcans();
 
         map.on('move', () => {
             setLng(map.getCenter().lng.toFixed(4));
@@ -63,17 +95,179 @@ const FirebaseContent = () => {
     }, []);
 
 
+    const handleNewTrashcan = () => {
+
+        var canName = document.getElementById("name").value;
+        var latitude = document.getElementById("latitude").value;
+        var longitude = document.getElementById("longitude").value;
+
+        if(canName.length === 0 || selectedDevice == null || latitude == null || longitude == null){
+            alert("Fields cannot be left empty");
+        } else {
+            setLoading(true);
+
+            var canID = canName + "-" + selectedDevice.coreid;
+
+            cansRef.child(canID)
+                .set({'canName': canName, 'latitude': latitude, 'longitude': longitude, 'canID' : canID,
+                'canLevel': selectedDevice.distance, 'particleID' : selectedDevice.coreid})
+                .then(() => {
+                    alert("Trash-can added successfully");
+                    setLoading(false);
+                    handleModal();
+                    getTrashcans();
+                    })
+                .catch((error) => {
+                    alert("Unable to add trash-can due to an error: " + error);
+                })
+
+        }
+
+    }
+
+    const startEdit = (trashcanID) => {
+        handleModal()
+        setShowEdit(true);
+        setEditID(trashcanID);
+    }
+
+    const handleEditTrashcan = () => {
+
+        console.log(editID);
+
+        var canName = document.getElementById("name").value;
+        var latitude = document.getElementById("latitude").value;
+        var longitude = document.getElementById("longitude").value;
+
+        if(canName.length === 0 || latitude == null || longitude == null){
+            alert("Fields cannot be left empty");
+        } else {
+            setLoading(true);
+
+            cansRef.child(editID)
+                .update({'canName': canName, 'latitude': latitude, 'longitude': longitude})
+                .then(() => {
+                    alert("Trash-can edited successfully");
+                    setLoading(false);
+                    handleModal();
+                    getTrashcans();
+                })
+                .catch((error) => {
+                    alert("Unable to edit trash-can due to an error: " + error);
+                })
+
+        }
+
+    }
+
+    const handleDeleteTrashcan = (deleteID) => {
+
+// eslint-disable-next-line no-restricted-globals
+        var confirmation = confirm("Are you sure you want to delete Trash-can??");
+        if(confirmation) {
+            console.log(deleteID);
+
+            cansRef.child(deleteID).remove()
+                .then(() => {
+                    alert("Trash-can deleted Successfully");
+                })
+                .catch((error) => {
+                    alert("Unable to add trash-can due to an error: " + error);
+                })
+
+        }
+    }
+
+
     return (
 
         <div>
             <div className="p-5">
+                <Modal
+                    title={showEdit ? "Edit Trash-can details" : "Add Trash-can"}
+                    centered
+                    visible={visible}
+                    onCancel={handleModal}
+                    footer={[
+                        <Button key="back" onClick={handleModal}>
+                            Cancel
+                        </Button>,
+                        <Button key="submit" type="primary" loading={loading} onClick={showEdit ? handleEditTrashcan : handleNewTrashcan}>
+                            {showEdit ? <>Edit</> : <>Create</>}
+                        </Button>]}
+                    width={800}>
+
+                <form>
+                    <div className="grey-text">
+                        <MDBInput
+                            label="enter trash-can name"
+                            icon="trash"
+                            group
+                            id="name"
+                            type="text"
+                            validate
+                            outline
+                            error="wrong"
+                            success="right"
+                        />
+
+                        {!showEdit ? <div className="d-flex my-3 justify-content-center align-items-center">
+                            <MDBIcon far icon="square" size="lg" />
+                            <Select
+                                className="ml-3 w-100"
+                                placeholder="select particle device on trash-can"
+                                onChange={handleDevice}
+                                options={deviceArray}
+                            />
+                        </div>: null}
+
+
+                        <MDBInput
+                            label="enter the latitude"
+                            icon="map-marker-alt"
+                            group
+                            outline
+                            id="latitude"
+                            type="number"
+                            validate
+                            error="wrong"
+                            success="right"
+                        />
+
+                        <MDBInput
+                            label="enter the longitude"
+                            icon="map-marker-alt"
+                            group
+                            outline
+                            id="longitude"
+                            type="number"
+                            validate
+                            error="wrong"
+                            success="right"
+                        />
+
+                    </div>
+                </form>
+
+                </Modal>
                 <MDBRow>
-                    <MDBCol md="4">
+                    <MDBCol md="3">
                         <MDBCard >
 
-                            <MDBCardTitle className="mt-3 ml-3 h6 grey-text">Trash-cans</MDBCardTitle>
+                            <MDBRow>
+                                <MDBCol>
+                                    <MDBCardTitle className="mt-3 ml-3 h6 grey-text">TRASH-CANS</MDBCardTitle>
+                                </MDBCol>
+                                <MDBCol>
+                                    <MDBBtn style={{float: "right", marginLeft: "auto", marginRight: 30 }}
+                                            color="info">
+                                        <MDBIcon icon="plus" onClick={() => {setShowEdit(false); handleModal();}}/>
+                                    </MDBBtn>
+                                </MDBCol>
+                            </MDBRow>
 
-                            {deviceArray.length == 0 ?
+
+                            {canArray.length === 0 ?
                                 <div className="d-flex justify-content-center w-100 p-2">
                                     <div className="spinner-border mx-2 mt-4 indigo-text spinner-border" role="status">
                                         <span className="sr-only">Loading...</span>
@@ -86,28 +280,34 @@ const FirebaseContent = () => {
                             <div className="scroll">
                                 <List
                                     itemLayout="horizontal">
-                                    {deviceArray.map((item, key) => (
+                                    {canArray.map((item, key) => (
                                         <List.Item key={key}>
-                                            <Card title={item.name} style={{ width: "100%" }}>
+                                            <Card title={item.name} className="pl-3" style={{ width: "100%" }}>
                                                 <MDBRow>
-                                                    <p>Device ID : {item.coreid}</p>
+                                                    <p><b>Trash-can Name</b> : {item.canName}</p>
                                                 </MDBRow>
                                                 <MDBRow>
-                                                    <p>Last Heard : {item.published_at}</p>
+                                                    <p><b>Latitude</b> : {item.latitude}</p>
                                                 </MDBRow>
                                                 <MDBRow>
-                                                    <p>Distance: {item.distance}</p>
+                                                    <p><b>Longitude</b> : {item.longitude}</p>
+                                                </MDBRow>
+                                                <MDBRow>
+                                                    <p><b>Trash-can Level</b> : {item.canLevel}</p>
+                                                </MDBRow>
+                                                <MDBRow>
+                                                    <p><b>Particle ID</b>: {item.particleID}</p>
                                                 </MDBRow>
                                                 <MDBRow>
                                                     <Button type="default" >
                                                         <MDBIcon icon="eye" />
                                                     </Button>
-                                                    <Button type="primary" className="ml-2">
+                                                    <Button type="primary" className="ml-2" onClick={() => {startEdit(item.canID)}}>
                                                         <MDBIcon icon="pencil-alt" />
                                                     </Button>
-                                                    <Button type="danger" className="ml-2">
+                                                    <Button type="danger" className="ml-2" onClick={() => {handleDeleteTrashcan(item.canID)}}>
                                                         <MDBIcon icon="trash-alt" />
-                                                    </Button>,
+                                                    </Button>
                                                 </MDBRow>
                                             </Card>
 
@@ -120,7 +320,7 @@ const FirebaseContent = () => {
                         </MDBCard>
                     </MDBCol>
 
-                    <MDBCol md="8">
+                    <MDBCol md="9">
                         <div>
                             <div>
                                 Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}

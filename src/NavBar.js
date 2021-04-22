@@ -19,10 +19,6 @@ const NavBar = () => {
                              <h3 className="text-white">Trash-can Portal</h3>
                          </Typography>
                      </div>
-                     <MDBBtn style={{float: "right", marginLeft: "auto", marginRight: 30 }}
-                              color="info">
-                         Add <MDBIcon icon="plus" className="ml-2"/>
-                     </MDBBtn>
                  </Toolbar>
              </AppBar>
 

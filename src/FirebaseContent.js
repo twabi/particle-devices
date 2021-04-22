@@ -80,6 +80,7 @@ const FirebaseContent = () => {
         });
 
         var tempArray = [];
+        setCanArray([]);
         cansRef.on("child_added", function (snapshot) {
             var device = snapshot.val();
             device.label = device.canName;
@@ -95,8 +96,13 @@ const FirebaseContent = () => {
                     "properties": {
                         "canName": item.canName,
                         "canID" : item.canID,
-                        "iconSize": [60, 60]
+                        "iconSize": [60, 60],
+                        "canLevel" : item.canLevel,
+                        "particleID" : item.particleID,
+                        "longitude" : item.longitude,
+                        "latitude" : item.latitude
                     },
+
                     "geometry": {
                         "type": "Point",
                         "coordinates": [item.longitude, item.latitude]
@@ -119,6 +125,65 @@ const FirebaseContent = () => {
         })
 
 
+        map.on("load", function() {
+            map.loadImage(
+                bin,
+                function(error, image) {
+                    map.addImage("custom-marker", image);
+
+
+                    //dummy location data and mechanic locations
+                    var geojson = {
+                        "type": "FeatureCollection",
+                        "features": geoLocArray
+                    };
+
+
+                    map.addSource("mechPoints", {
+                        "type": "geojson",
+                        "data": geojson
+                    });
+
+
+                    map.addLayer({
+                        "id": "mechSymbols",
+                        "type": "symbol",
+                        "source": "mechPoints",
+                        "layout": {
+                            "icon-image": "custom-marker"
+                        }
+                    });
+
+
+                    // Center the map on the coordinates of any clicked symbol from the 'symbols' layer.
+                    map.on("click", "mechSymbols", function(e) {
+                        console.log(e.features[0]);
+                        var trashcan = {
+                            "canName": e.features[0].properties.canName,
+                            "canID" : e.features[0].properties.canID,
+                            "canLevel" : e.features[0].properties.canLevel,
+                            "particleID" : e.features[0].properties.particleID,
+                            "longitude" : e.features[0].properties.longitude,
+                            "latitude" : e.features[0].properties.latitude
+
+                        }
+
+                        showCanDetails(trashcan);
+                    });
+
+                    map.on("mouseenter", "mechSymbols", function() {
+                        map.getCanvas().style.cursor = "pointer";
+                        //alert("some mechanic");
+                    });
+
+                    map.on("mouseleave", "mechSymbols", function() {
+                        map.getCanvas().style.cursor = "";
+                    });
+
+
+                }
+            );
+        });
 
 
         return () => map.remove();
@@ -209,6 +274,7 @@ const FirebaseContent = () => {
     }
 
     const showCanDetails = (trashcan) => {
+        console.log(trashcan)
         setSelectedCan(trashcan);
         setIsModalVisible(true);
     }

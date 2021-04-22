@@ -19,3 +19,11 @@ code {
   bottom: 0;
 }
 
+.marker {
+  display: block;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+}
+

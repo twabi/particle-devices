@@ -33,16 +33,19 @@ const FirebaseContent = () => {
         });
         var tempArray = [];
 
+        setDeviceArray([])
         devicesRef.on("child_added", function (snapshot) {
-            var devices = snapshot.val();
+            var device = snapshot.val();
 
-            tempArray.push(devices);
+            tempArray.push(device);
 
-            console.log(devices);
+            console.log(device);
+            //setDeviceArray(tempArray);
+            setDeviceArray(deviceArray => [...deviceArray, device]);
         });
 
         console.log(tempArray)
-        setDeviceArray(tempArray);
+
 
         map.on('move', () => {
             setLng(map.getCenter().lng.toFixed(4));
@@ -88,15 +91,22 @@ const FirebaseContent = () => {
                                             <Card title={item.name} style={{ width: "100%" }}>
                                                 <MDBRow>
                                                     <p>Device ID : {item.coreid}</p>
+                                                </MDBRow>
+                                                <MDBRow>
                                                     <p>Last Heard : {item.published_at}</p>
+                                                </MDBRow>
+                                                <MDBRow>
                                                     <p>Distance: {item.distance}</p>
                                                 </MDBRow>
                                                 <MDBRow>
-                                                    <Button type="primary" className="mx-2">
-                                                        Edit
+                                                    <Button type="default" >
+                                                        <MDBIcon icon="eye" />
                                                     </Button>
-                                                    <Button className="mx-2" type="danger" >
-                                                        Delete
+                                                    <Button type="primary" className="ml-2">
+                                                        <MDBIcon icon="pencil-alt" />
+                                                    </Button>
+                                                    <Button type="danger" className="ml-2">
+                                                        <MDBIcon icon="trash-alt" />
                                                     </Button>,
                                                 </MDBRow>
                                             </Card>

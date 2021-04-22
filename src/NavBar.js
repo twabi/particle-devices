@@ -21,7 +21,7 @@ const NavBar = () => {
                      </div>
                      <MDBBtn style={{float: "right", marginLeft: "auto", marginRight: 30 }}
                               color="info">
-                         <MDBIcon icon="plus" />Add Trash-Can
+                         Add <MDBIcon icon="plus" className="ml-2"/>
                      </MDBBtn>
                  </Toolbar>
              </AppBar>

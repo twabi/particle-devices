@@ -8,7 +8,6 @@ import {
     MDBCardBody,
     MDBCardTitle,
     MDBCol,
-    MDBContainer,
     MDBIcon,
     MDBInput,
     MDBRow
@@ -16,6 +15,7 @@ import {
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import Select from 'react-select';
 import {Divider} from "@material-ui/core";
+import bin from "./bin.png";
 
 
 const { Title } = Typography
@@ -79,8 +79,34 @@ const FirebaseContent = () => {
             setDeviceArray(deviceArray => [...deviceArray, device]);
         });
 
+        var tempArray = [];
+        cansRef.on("child_added", function (snapshot) {
+            var device = snapshot.val();
+            device.label = device.canName;
+            tempArray.push(device);
+            setCanArray(canArray => [...canArray, device]);
+        });
+        var geoLocArray = [];
 
-       getTrashcans();
+        tempArray.map((item) => {
+            geoLocArray.push(
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "canName": item.canName,
+                        "canID" : item.canID,
+                        "iconSize": [60, 60]
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [item.longitude, item.latitude]
+                    }
+                }
+            );
+        })
+
+
+       //getTrashcans();
 
         map.on('move', () => {
             setLng(map.getCenter().lng.toFixed(4));
@@ -92,9 +118,10 @@ const FirebaseContent = () => {
             map.resize()
         })
 
+
+
+
         return () => map.remove();
-
-
     }, []);
 
 

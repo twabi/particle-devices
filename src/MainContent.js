@@ -84,7 +84,7 @@ const MainContent = () => {
                                     console.log('An error occurred while getting attrs:', err);
                                 });
                             });
-                            setDevices(devices.body);
+
                         },
                         function(err) {
                             console.log('List devices call failed: ', err);

@@ -15,6 +15,7 @@ import {
 } from "mdbreact";
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import Select from 'react-select';
+import {Divider} from "@material-ui/core";
 
 
 const { Title } = Typography
@@ -38,6 +39,8 @@ const FirebaseContent = () => {
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [editID, setEditID] = useState(null);
+    const [selectedCan, setSelectedCan] = useState(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
 
     const handleDevice = (selectedOption) => {
@@ -178,11 +181,61 @@ const FirebaseContent = () => {
         }
     }
 
+    const showCanDetails = (trashcan) => {
+        setSelectedCan(trashcan);
+        setIsModalVisible(true);
+    }
 
     return (
 
         <div>
             <div className="p-5">
+                <Modal title="Trash-can Details" visible={isModalVisible} onOk={() => {setIsModalVisible(false)}} cancelButtonProps={false} onCancel={() => {setIsModalVisible(false)}}>
+
+                    <div className="ml-3">
+                        <MDBRow>
+                            <p><b>Trash-can Name</b> : {selectedCan && selectedCan.canName}</p>
+                        </MDBRow>
+                        <MDBRow>
+                            <p><b>Latitude</b> : {selectedCan && selectedCan.latitude}</p>
+                        </MDBRow>
+                        <MDBRow>
+                            <p><b>Longitude</b> : {selectedCan && selectedCan.longitude}</p>
+                        </MDBRow>
+                        <MDBRow>
+                            <p><b>Trash-can Level</b> : {selectedCan && selectedCan.canLevel}</p>
+                        </MDBRow>
+
+                        <MDBRow>
+                            <MDBCard>
+                                <MDBCardBody>
+
+                                    <h6 className="indigo-text"><b>Particle Device Details</b></h6>
+                                    <Divider/>
+
+                                    <div className="ml-3 mt-2 mr-2">
+                                        <MDBRow>
+                                            <p><b>Particle ID</b> : {selectedCan && selectedCan.particleID}</p>
+                                        </MDBRow>
+                                        <MDBRow>
+                                            <p><b>Status</b> : {"Online"}</p>
+                                        </MDBRow>
+                                        <MDBRow>
+                                            <p><b>Charging</b>: {"True"}</p>
+                                        </MDBRow>
+                                        <MDBRow>
+                                            <p><b>Charging-Level</b>: {"60%"}</p>
+                                        </MDBRow>
+                                    </div>
+
+                                </MDBCardBody>
+
+                            </MDBCard>
+
+                        </MDBRow>
+                    </div>
+
+                </Modal>
                 <Modal
                     title={showEdit ? "Edit Trash-can details" : "Add Trash-can"}
                     centered
@@ -299,7 +352,7 @@ const FirebaseContent = () => {
                                                     <p><b>Particle ID</b>: {item.particleID}</p>
                                                 </MDBRow>
                                                 <MDBRow>
-                                                    <Button type="default" >
+                                                    <Button type="default" onClick={() => {showCanDetails(item)}}>
                                                         <MDBIcon icon="eye" />
                                                     </Button>
                                                     <Button type="primary" className="ml-2" onClick={() => {startEdit(item.canID)}}>

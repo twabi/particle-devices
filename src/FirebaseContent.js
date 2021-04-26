@@ -292,6 +292,7 @@ const FirebaseContent = () => {
             var level = device.distance;
             var batteryLife = device.batteryLife;
             var hasPower = device.hasPower;
+            var status =  device.status;
 
             console.log(hasPower, isCharging);
 
@@ -310,6 +311,7 @@ const FirebaseContent = () => {
             console.log(trashcan.hasPower, trashcan.isCharging);
             trashcan.canLevel = level;
             trashcan.batteryLife = batteryLife;
+            trashcan.status = status;
 
         });
 
@@ -349,7 +351,7 @@ const FirebaseContent = () => {
                                             <p><b>Particle ID</b> : {selectedCan && selectedCan.particleID}</p>
                                         </MDBRow>
                                         <MDBRow>
-                                            <p><b>Status</b> : {"Online"}</p>
+                                            <p><b>Status</b> :  <b className={selectedCan.status === "Online" ? "text-success" : "text-danger"}>{selectedCan && selectedCan.status}</b></p>
                                         </MDBRow>
                                         <MDBRow>
                                             <p><b>Charging</b>: <b className={selectedCan.isCharging === "true" ? "text-success" : "text-danger"}>{selectedCan && selectedCan.isCharging}</b></p>
@@ -358,7 +360,7 @@ const FirebaseContent = () => {
                                             <p><b>Charging-Level</b>: {selectedCan && selectedCan.batteryLife}%</p>
                                         </MDBRow>
                                         <MDBRow>
-                                            <p><b>Power Connected</b>: <b className={selectedCan.isCharging === "true" ? "text-success" : "text-danger"}> {selectedCan && selectedCan.hasPower}</b></p>
+                                            <p><b>Power Connected</b>: <b className={selectedCan.hasPower === "true" ? "text-success" : "text-danger"}> {selectedCan && selectedCan.hasPower}</b></p>
                                         </MDBRow>
                                     </div>
 

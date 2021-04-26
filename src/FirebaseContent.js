@@ -15,7 +15,7 @@ import {
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import Select from 'react-select';
 import {Divider} from "@material-ui/core";
-import bin from "./bin.png";
+import bin from "./trash.png";
 
 
 const { Title } = Typography

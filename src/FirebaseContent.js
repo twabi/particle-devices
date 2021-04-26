@@ -275,6 +275,36 @@ const FirebaseContent = () => {
 
     const showCanDetails = (trashcan) => {
         console.log(trashcan)
+        var trashcanID = trashcan.particleID;
+
+        devicesRef.child(trashcanID).on('value', function (snapshot){
+            var device = snapshot.val();
+            console.log(device);
+            var isCharging = device.isCharging;
+            var level = device.distance;
+            var batteryLife = device.batteryLife;
+            var hasPower = device.hasPower;
+
+            console.log(hasPower, isCharging);
+
+            if(hasPower == 1){
+                trashcan.hasPower = "true";
+            } else {
+                trashcan.hasPower = "false";
+            }
+
+            if(isCharging == 1){
+                trashcan.isCharging = "true";
+            } else {
+                trashcan.isCharging = "false";
+            }
+
+            console.log(trashcan.hasPower, trashcan.isCharging);
+            trashcan.canLevel = level;
+            trashcan.batteryLife = batteryLife;
+
+        });
+
         setSelectedCan(trashcan);
         setIsModalVisible(true);
     }
@@ -314,10 +344,13 @@ const FirebaseContent = () => {
                                             <p><b>Status</b> : {"Online"}</p>
                                         </MDBRow>
                                         <MDBRow>
-                                            <p><b>Charging</b>: {"True"}</p>
+                                            <p><b>Charging</b>: <b className={selectedCan.isCharging === "true" ? "text-success" : "text-danger"}>{selectedCan && selectedCan.isCharging}</b></p>
                                         </MDBRow>
                                         <MDBRow>
-                                            <p><b>Charging-Level</b>: {"60%"}</p>
+                                            <p><b>Charging-Level</b>: {selectedCan && selectedCan.batteryLife}</p>
+                                        </MDBRow>
+                                        <MDBRow>
+                                            <p><b>Power Connected</b>: <b className={selectedCan.isCharging === "true" ? "text-success" : "text-danger"}> {selectedCan && selectedCan.hasPower}</b></p>
                                         </MDBRow>
                                     </div>
 

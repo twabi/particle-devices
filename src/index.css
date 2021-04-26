@@ -26,4 +26,16 @@ code {
   cursor: pointer;
   padding: 0;
 }
+.scroll {
+  max-height: 570px;
+  overflow-y: auto;
+}
+
+.height-max {
+  max-height: 570px;
+}
+
+.no-scroll {
+  overflow-y: hidden;
+}
 

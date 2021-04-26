@@ -14,7 +14,6 @@ import {
 } from "mdbreact";
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import Select from 'react-select';
-import {Divider} from "@material-ui/core";
 import bin from "./trash.png";
 
 
@@ -321,7 +320,7 @@ const FirebaseContent = () => {
 
     return (
 
-        <div>
+        <div className="no-scroll">
             <div className="p-5">
                 <Modal title="Trash-can Details" visible={isModalVisible} onOk={() => {setIsModalVisible(false)}} cancelButtonProps={false} onCancel={() => {setIsModalVisible(false)}}>
 
@@ -344,7 +343,7 @@ const FirebaseContent = () => {
                                 <MDBCardBody>
 
                                     <h6 className="indigo-text"><b>Particle Device Details</b></h6>
-                                    <Divider/>
+                                    <hr/>
 
                                     <div className="ml-3 mt-2 mr-2">
                                         <MDBRow>
@@ -439,8 +438,8 @@ const FirebaseContent = () => {
                 </form>
 
                 </Modal>
-                <MDBRow>
-                    <MDBCol md="3">
+                <MDBRow className="no-scroll">
+                    <MDBCol md="3" className="no-scroll">
                         <MDBCard >
 
                             <MDBRow>
@@ -510,7 +509,7 @@ const FirebaseContent = () => {
                     </MDBCol>
 
                     <MDBCol md="9">
-                        <div>
+                        <div className="height-max">
                             <div>
                                 Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
                             </div>

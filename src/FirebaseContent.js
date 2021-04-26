@@ -82,10 +82,18 @@ const FirebaseContent = () => {
         var tempArray = [];
         setCanArray([]);
         cansRef.on("child_added", function (snapshot) {
-            var device = snapshot.val();
-            device.label = device.canName;
-            tempArray.push(device);
-            setCanArray(canArray => [...canArray, device]);
+            var trashCan = snapshot.val();
+            console.log(trashCan.particleID)
+            devicesRef.child(trashCan.particleID).on('value', function (snapshot){
+                if(snapshot.exists()){
+                    var particleDevice = snapshot.val();
+                    trashCan.canLevel = particleDevice.distance;
+                }
+
+            });
+            trashCan.label = trashCan.canName;
+            tempArray.push(trashCan);
+            setCanArray(canArray => [...canArray, trashCan]);
         });
         var geoLocArray = [];
 
@@ -347,7 +355,7 @@ const FirebaseContent = () => {
                                             <p><b>Charging</b>: <b className={selectedCan.isCharging === "true" ? "text-success" : "text-danger"}>{selectedCan && selectedCan.isCharging}</b></p>
                                         </MDBRow>
                                         <MDBRow>
-                                            <p><b>Charging-Level</b>: {selectedCan && selectedCan.batteryLife}</p>
+                                            <p><b>Charging-Level</b>: {selectedCan && selectedCan.batteryLife}%</p>
                                         </MDBRow>
                                         <MDBRow>
                                             <p><b>Power Connected</b>: <b className={selectedCan.isCharging === "true" ? "text-success" : "text-danger"}> {selectedCan && selectedCan.hasPower}</b></p>

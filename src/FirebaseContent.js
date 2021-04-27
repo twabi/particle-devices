@@ -228,7 +228,7 @@ const FirebaseContent = () => {
     }
 
     const startEdit = (trashcanID) => {
-        handleModal()
+        handleModal();
         setShowEdit(true);
         setEditID(trashcanID);
     }

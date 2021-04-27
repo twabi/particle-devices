@@ -1,5 +1,4 @@
 import React from 'react'
-import "mdbreact/dist/css/mdb.css";
 import { Layout } from 'antd';
 
 const { Header } = Layout;

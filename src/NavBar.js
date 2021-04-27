@@ -1,6 +1,8 @@
 import React from 'react'
-import {MDBBtn, MDBIcon, MDBNavbar, MDBNavbarBrand} from "mdbreact";
 import "mdbreact/dist/css/mdb.css";
+import { Layout } from 'antd';
+
+const { Header } = Layout;
 
 
 const NavBar = () => {
@@ -9,11 +11,11 @@ const NavBar = () => {
      return(
 
          <div>
-             <MDBNavbar color="indigo" dark expand="md">
-                 <MDBNavbarBrand>
-                     <strong className="white-text font-weight-bold">Trash-can Portal</strong>
-                 </MDBNavbarBrand>
-             </MDBNavbar>
+             <Header>
+                 <div className="logo text-white text-left font-weight-bold">
+                     <b className="h5">TRASH-CAN PORTAL</b>
+                 </div>
+             </Header>
 
          </div>
      );

@@ -1,24 +1,11 @@
 import React, {useState, useEffect} from "react";
-import {Button, Card, Layout, List, Modal, Typography} from "antd";
+import {Button, Card, Col, Input, List, Modal, Row} from "antd";
 import Firebase from "./Firebase";
-import {
-    MDBBox,
-    MDBBtn,
-    MDBCard,
-    MDBCardBody,
-    MDBCardTitle,
-    MDBCol,
-    MDBIcon,
-    MDBInput,
-    MDBRow
-} from "mdbreact";
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import Select from 'react-select';
 import bin from "./trash.png";
+import {DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined} from "@ant-design/icons";
 
-
-const { Title } = Typography
-const { Header, Content } = Layout;
 // eslint-disable-next-line import/no-webpack-loader-syntax
 mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
 mapboxgl.accessToken = "pk.eyJ1IjoidHdhYmkiLCJhIjoiY2tlZnZyMWozMHRqdjJzb3k2YzlxZnloYSJ9.FBL3kyXAQ22kEws-y6XbJQ";
@@ -322,53 +309,53 @@ const FirebaseContent = () => {
     return (
 
         <div className="no-scroll">
-            <div className="p-5">
+            <div className="p-4">
                 <Modal title="Trash-can Details" visible={isModalVisible} onOk={() => {setIsModalVisible(false)}} cancelButtonProps={false} onCancel={() => {setIsModalVisible(false)}}>
 
                     <div className="ml-3">
-                        <MDBRow>
+                        <Row>
                             <p><b>Trash-can Name</b> : {selectedCan && selectedCan.canName}</p>
-                        </MDBRow>
-                        <MDBRow>
+                        </Row>
+                        <Row>
                             <p><b>Latitude</b> : {selectedCan && selectedCan.latitude}</p>
-                        </MDBRow>
-                        <MDBRow>
+                        </Row>
+                        <Row>
                             <p><b>Longitude</b> : {selectedCan && selectedCan.longitude}</p>
-                        </MDBRow>
-                        <MDBRow>
+                        </Row>
+                        <Row>
                             <p><b>Trash-can Level</b> : {selectedCan && selectedCan.canLevel}</p>
-                        </MDBRow>
+                        </Row>
 
-                        <MDBRow>
-                            <MDBCard>
-                                <MDBCardBody>
+                        <Row>
+                            <Card>
+                                <>
 
                                     <h6 className="indigo-text"><b>Particle Device Details</b></h6>
                                     <hr/>
 
                                     <div className="ml-3 mt-2 mr-2">
-                                        <MDBRow>
+                                        <Row>
                                             <p><b>Particle ID</b> : {selectedCan && selectedCan.particleID}</p>
-                                        </MDBRow>
-                                        <MDBRow>
+                                        </Row>
+                                        <Row>
                                             <p><b>Status</b> :  <b className={selectedCan && selectedCan.status === "Online" ? "text-success" : "text-danger"}>{selectedCan && selectedCan.status}</b></p>
-                                        </MDBRow>
-                                        <MDBRow>
+                                        </Row>
+                                        <Row>
                                             <p><b>Charging</b>: <b className={selectedCan && selectedCan.isCharging === "true" ? "text-success" : "text-danger"}>{selectedCan && selectedCan.isCharging}</b></p>
-                                        </MDBRow>
-                                        <MDBRow>
+                                        </Row>
+                                        <Row>
                                             <p><b>Battery Level</b>: {selectedCan && selectedCan.batteryLife}%</p>
-                                        </MDBRow>
-                                        <MDBRow>
+                                        </Row>
+                                        <Row>
                                             <p><b>Power Connected</b>: <b className={selectedCan && selectedCan.hasPower === "true" ? "text-success" : "text-danger"}> {selectedCan && selectedCan.hasPower}</b></p>
-                                        </MDBRow>
+                                        </Row>
                                     </div>
 
-                                </MDBCardBody>
+                                </>
 
-                            </MDBCard>
+                            </Card>
 
-                        </MDBRow>
+                        </Row>
                     </div>
 
                 </Modal>
@@ -384,12 +371,12 @@ const FirebaseContent = () => {
                         <Button key="submit" type="primary" loading={loading} onClick={showEdit ? handleEditTrashcan : handleNewTrashcan}>
                             {showEdit ? <>Edit</> : <>Create</>}
                         </Button>]}
-                    width={800}>
+                    width={500}>
 
                 <form>
                     <div className="grey-text">
-                        <MDBInput
-                            label="enter trash-can name"
+                        <Input
+                            placeholder="enter trash-can name"
                             icon="trash"
                             group
                             id="name"
@@ -400,10 +387,9 @@ const FirebaseContent = () => {
                             success="right"
                         />
 
-                        {!showEdit ? <div className="d-flex my-3 justify-content-center align-items-center">
-                            <MDBIcon far icon="square" size="lg" />
+                        {!showEdit ? <div className="d-flex mt-4 justify-content-center align-items-center">
                             <Select
-                                className="ml-3 w-100"
+                                className="w-100"
                                 placeholder="select particle device on trash-can"
                                 onChange={handleDevice}
                                 options={deviceArray}
@@ -411,11 +397,12 @@ const FirebaseContent = () => {
                         </div>: null}
 
 
-                        <MDBInput
-                            label="enter the latitude"
+                        <Input
+                            placeholder="enter the latitude"
                             icon="map-marker-alt"
                             group
                             outline
+                            className="mt-4"
                             id="latitude"
                             type="number"
                             validate
@@ -423,12 +410,13 @@ const FirebaseContent = () => {
                             success="right"
                         />
 
-                        <MDBInput
-                            label="enter the longitude"
+                        <Input
+                            placeholder="enter the longitude"
                             icon="map-marker-alt"
                             group
                             outline
                             id="longitude"
+                            className="mt-4"
                             type="number"
                             validate
                             error="wrong"
@@ -439,21 +427,20 @@ const FirebaseContent = () => {
                 </form>
 
                 </Modal>
-                <MDBRow className="no-scroll">
-                    <MDBCol md="3" className="no-scroll">
-                        <MDBCard >
-
-                            <MDBRow>
-                                <MDBCol>
-                                    <MDBCardTitle className="mt-3 ml-3 h6 grey-text">TRASH-CANS</MDBCardTitle>
-                                </MDBCol>
-                                <MDBCol>
-                                    <MDBBtn style={{float: "right", marginLeft: "auto", marginRight: 30 }}
-                                            color="info">
-                                        <MDBIcon icon="plus" onClick={() => {setShowEdit(false); handleModal();}}/>
-                                    </MDBBtn>
-                                </MDBCol>
-                            </MDBRow>
+                <Row>
+                    <Col span={7} className="mr-3">
+                        <Card className="mr-3">
+                            <Row>
+                                <Col span={18}>
+                                    <b className=" h6 float-left grey-text">TRASH-CANS</b>
+                                </Col>
+                                <Col span={6}>
+                                    <Button style={{float: "right", marginLeft: "auto", marginRight: 30 }} className="d-flex justify-content-center"
+                                            type="primary" onClick={() => {setShowEdit(false); handleModal();}}>
+                                        <PlusOutlined/>
+                                    </Button>
+                                </Col>
+                            </Row>
 
 
                             {canArray.length === 0 ?
@@ -471,33 +458,33 @@ const FirebaseContent = () => {
                                     itemLayout="horizontal">
                                     {canArray.map((item, key) => (
                                         <List.Item key={key}>
-                                            <Card title={item.name} className="pl-3" style={{ width: "100%" }}>
-                                                <MDBRow>
+                                            <Card title={item.name} className="pl-1" style={{ width: "100%" }}>
+                                                <Row>
                                                     <p><b>Trash-can Name</b> : {item.canName}</p>
-                                                </MDBRow>
-                                                <MDBRow>
+                                                </Row>
+                                                <Row>
                                                     <p><b>Latitude</b> : {item.latitude}</p>
-                                                </MDBRow>
-                                                <MDBRow>
+                                                </Row>
+                                                <Row>
                                                     <p><b>Longitude</b> : {item.longitude}</p>
-                                                </MDBRow>
-                                                <MDBRow>
+                                                </Row>
+                                                <Row>
                                                     <p><b>Trash-can Level</b> : {item.canLevel}</p>
-                                                </MDBRow>
-                                                <MDBRow>
+                                                </Row>
+                                                <Row>
                                                     <p><b>Particle ID</b>: {item.particleID}</p>
-                                                </MDBRow>
-                                                <MDBRow>
-                                                    <Button type="default" onClick={() => {showCanDetails(item)}}>
-                                                        <MDBIcon icon="eye" />
+                                                </Row>
+                                                <Row>
+                                                    <Button type="default" className="d-flex justify-content-center" onClick={() => {showCanDetails(item)}}>
+                                                        <EyeOutlined />
                                                     </Button>
-                                                    <Button type="primary" className="ml-2" onClick={() => {startEdit(item.canID)}}>
-                                                        <MDBIcon icon="pencil-alt" />
+                                                    <Button type="primary" className="ml-2 d-flex justify-content-center" onClick={() => {startEdit(item.canID)}}>
+                                                        <EditOutlined />
                                                     </Button>
-                                                    <Button type="danger" className="ml-2" onClick={() => {handleDeleteTrashcan(item.canID)}}>
-                                                        <MDBIcon icon="trash-alt" />
+                                                    <Button type="danger" className="ml-2 d-flex justify-content-center" onClick={() => {handleDeleteTrashcan(item.canID)}}>
+                                                        <DeleteOutlined />
                                                     </Button>
-                                                </MDBRow>
+                                                </Row>
                                             </Card>
 
                                         </List.Item>
@@ -506,18 +493,18 @@ const FirebaseContent = () => {
                             </div>
 
 
-                        </MDBCard>
-                    </MDBCol>
+                        </Card>
+                    </Col>
 
-                    <MDBCol md="9">
+                    <Col span={16}>
                         <div className="height-max">
                             <div>
                                 Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
                             </div>
                             <div className="map-container border border-primary" ref={mapContainer} />
                         </div>
-                    </MDBCol>
-                </MDBRow>
+                    </Col>
+                </Row>
 
 
 

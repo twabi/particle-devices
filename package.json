@@ -5,9 +5,9 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@testing-library/jest-dom": "^5.11.10",
-    "@testing-library/react": "^11.2.5",
+    "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^12.8.3",
-    "antd": "^4.14.1",
+    "antd": "^4.14.0",
     "bootstrap": "^4.6.0",
     "firebase": "^8.3.2",
     "mapbox-gl": "^2.2.0",
@@ -16,7 +16,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts": "4.0.3",
-    "react-select": "^4.3.0",
+    "react-select": "^4.2.1",
     "web-vitals": "^1.1.1",
     "worker-loader": "^3.0.7"
   },

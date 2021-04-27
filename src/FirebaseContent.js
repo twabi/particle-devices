@@ -97,6 +97,7 @@ const FirebaseContent = () => {
         var geoLocArray = [];
 
         tempArray.map((item) => {
+            console.log(item.longitude, item.latitude);
             geoLocArray.push(
                 {
                     "type": "Feature",

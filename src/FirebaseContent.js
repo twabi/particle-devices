@@ -19,7 +19,7 @@ const FirebaseContent = () => {
     const mapContainer = React.useRef(null);
     const [lng, setLng] = useState(35.0168);
     const [lat, setLat] = useState(-15.7667);
-    const [zoom, setZoom] = useState(12);
+    const [zoom, setZoom] = useState(10);
     const [showEdit, setShowEdit] = useState(false);
     const [selectedDevice, setSelectedDevice] = useState(null);
     const [visible, setVisible] = useState(false);
@@ -59,55 +59,44 @@ const FirebaseContent = () => {
         setDeviceArray([])
         devicesRef.on("child_added", function (snapshot) {
             var device = snapshot.val();
-
             device.label = device.coreid;
-            console.log(device);
             setDeviceArray(deviceArray => [...deviceArray, device]);
         });
 
         var tempArray = [];
+        var geoLocArray = [];
         setCanArray([]);
         cansRef.on("child_added", function (snapshot) {
             var trashCan = snapshot.val();
-            console.log(trashCan.particleID)
             devicesRef.child(trashCan.particleID).on('value', function (snapshot){
                 if(snapshot.exists()){
                     var particleDevice = snapshot.val();
                     trashCan.canLevel = particleDevice.distance;
                 }
-
             });
             trashCan.label = trashCan.canName;
             tempArray.push(trashCan);
-            setCanArray(canArray => [...canArray, trashCan]);
-        });
-        var geoLocArray = [];
-
-        tempArray.map((item) => {
-            console.log(item.longitude, item.latitude);
             geoLocArray.push(
                 {
                     "type": "Feature",
                     "properties": {
-                        "canName": item.canName,
-                        "canID" : item.canID,
+                        "canName": trashCan.canName,
+                        "canID" : trashCan.canID,
                         "iconSize": [60, 60],
-                        "canLevel" : item.canLevel,
-                        "particleID" : item.particleID,
-                        "longitude" : item.longitude,
-                        "latitude" : item.latitude
+                        "canLevel" : trashCan.canLevel,
+                        "particleID" : trashCan.particleID,
+                        "longitude" : trashCan.longitude,
+                        "latitude" : trashCan.latitude
                     },
 
                     "geometry": {
                         "type": "Point",
-                        "coordinates": [item.longitude, item.latitude]
+                        "coordinates": [trashCan.longitude, trashCan.latitude]
                     }
                 }
             );
-        })
-
-
-       //getTrashcans();
+            setCanArray([...tempArray]);
+        });
 
         map.on('move', () => {
             setLng(map.getCenter().lng.toFixed(4));
@@ -126,19 +115,16 @@ const FirebaseContent = () => {
                 function(error, image) {
                     map.addImage("custom-marker", image);
 
-
                     //dummy location data and mechanic locations
                     var geojson = {
                         "type": "FeatureCollection",
                         "features": geoLocArray
                     };
 
-
                     map.addSource("mechPoints", {
                         "type": "geojson",
                         "data": geojson
                     });
-
 
                     map.addLayer({
                         "id": "mechSymbols",
@@ -148,7 +134,6 @@ const FirebaseContent = () => {
                             "icon-image": "custom-marker"
                         }
                     });
-
 
                     // Center the map on the coordinates of any clicked symbol from the 'symbols' layer.
                     map.on("click", "mechSymbols", function(e) {
@@ -174,8 +159,6 @@ const FirebaseContent = () => {
                     map.on("mouseleave", "mechSymbols", function() {
                         map.getCanvas().style.cursor = "";
                     });
-
-
                 }
             );
         });
@@ -200,13 +183,13 @@ const FirebaseContent = () => {
 
             cansRef.child(canID)
                 .set({'canName': canName, 'latitude': latitude, 'longitude': longitude, 'canID' : canID,
-                'canLevel': selectedDevice.distance, 'particleID' : selectedDevice.coreid})
+                    'canLevel': selectedDevice.distance, 'particleID' : selectedDevice.coreid})
                 .then(() => {
                     alert("Trash-can added successfully");
                     setLoading(false);
                     handleModal();
                     getTrashcans();
-                    })
+                })
                 .catch((error) => {
                     alert("Unable to add trash-can due to an error: " + error);
                 })
@@ -260,6 +243,7 @@ const FirebaseContent = () => {
             cansRef.child(deleteID).remove()
                 .then(() => {
                     alert("Trash-can deleted Successfully");
+                    window.location.reload();
                 })
                 .catch((error) => {
                     alert("Unable to add trash-can due to an error: " + error);
@@ -373,58 +357,58 @@ const FirebaseContent = () => {
                         </Button>]}
                     width={500}>
 
-                <form>
-                    <div className="grey-text">
-                        <Input
-                            placeholder="enter trash-can name"
-                            icon="trash"
-                            group
-                            id="name"
-                            type="text"
-                            validate
-                            outline
-                            error="wrong"
-                            success="right"
-                        />
-
-                        {!showEdit ? <div className="d-flex mt-4 justify-content-center align-items-center">
-                            <Select
-                                className="w-100"
-                                placeholder="select particle device on trash-can"
-                                onChange={handleDevice}
-                                options={deviceArray}
+                    <form>
+                        <div className="grey-text">
+                            <Input
+                                placeholder="enter trash-can name"
+                                icon="trash"
+                                group
+                                id="name"
+                                type="text"
+                                validate
+                                outline
+                                error="wrong"
+                                success="right"
                             />
-                        </div>: null}
+
+                            {!showEdit ? <div className="d-flex mt-4 justify-content-center align-items-center">
+                                <Select
+                                    className="w-100"
+                                    placeholder="select particle device on trash-can"
+                                    onChange={handleDevice}
+                                    options={deviceArray}
+                                />
+                            </div>: null}
 
 
-                        <Input
-                            placeholder="enter the latitude"
-                            icon="map-marker-alt"
-                            group
-                            outline
-                            className="mt-4"
-                            id="latitude"
-                            type="number"
-                            validate
-                            error="wrong"
-                            success="right"
-                        />
+                            <Input
+                                placeholder="enter the latitude"
+                                icon="map-marker-alt"
+                                group
+                                outline
+                                className="mt-4"
+                                id="latitude"
+                                type="number"
+                                validate
+                                error="wrong"
+                                success="right"
+                            />
 
-                        <Input
-                            placeholder="enter the longitude"
-                            icon="map-marker-alt"
-                            group
-                            outline
-                            id="longitude"
-                            className="mt-4"
-                            type="number"
-                            validate
-                            error="wrong"
-                            success="right"
-                        />
+                            <Input
+                                placeholder="enter the longitude"
+                                icon="map-marker-alt"
+                                group
+                                outline
+                                id="longitude"
+                                className="mt-4"
+                                type="number"
+                                validate
+                                error="wrong"
+                                success="right"
+                            />
 
-                    </div>
-                </form>
+                        </div>
+                    </form>
 
                 </Modal>
                 <Row>

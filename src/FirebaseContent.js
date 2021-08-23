@@ -191,7 +191,7 @@ const FirebaseContent = () => {
             cansRef.child(canID)
                 .set(object)
                 .then(() => {
-                    alert("Trash-can added successfully");
+                    //alert("Trash-can added successfully");
                     setLoading(false);
                     handleModal();
                 })
@@ -225,7 +225,7 @@ const FirebaseContent = () => {
             cansRef.child(editID)
                 .update({'canName': canName, 'latitude': latitude, 'longitude': longitude})
                 .then(() => {
-                    alert("Trash-can edited successfully");
+                    //alert("Trash-can edited successfully");
                     setLoading(false);
                     handleModal();
                 })
@@ -247,7 +247,7 @@ const FirebaseContent = () => {
             cansRef.child(deleteID).remove()
                 .then(() => {
                     alert("Trash-can deleted Successfully");
-                    window.location.reload();
+                    //window.location.reload();
                 })
                 .catch((error) => {
                     alert("Unable to add trash-can due to an error: " + error);
@@ -257,7 +257,6 @@ const FirebaseContent = () => {
     }
 
     const showCanDetails = (trashcan) => {
-        console.log(trashcan)
         var trashcanID = trashcan.particleID;
 
         devicesRef.child(trashcanID).on('value', function (snapshot){
@@ -283,7 +282,6 @@ const FirebaseContent = () => {
                 trashcan.isCharging = "false";
             }
 
-            console.log(trashcan.hasPower, trashcan.isCharging);
             trashcan.canLevel = level;
             trashcan.batteryLife = batteryLife;
             trashcan.status = status;

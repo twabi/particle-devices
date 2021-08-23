@@ -4,7 +4,8 @@ import Firebase from "./Firebase";
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import Select from 'react-select';
 import bin from "./trash.png";
-import {DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined} from "@ant-design/icons";
+import {DeleteOutlined, EditOutlined, EyeOutlined, ReloadOutlined, PlusOutlined} from "@ant-design/icons";
+import {useListVals} from "react-firebase-hooks/database";
 
 // eslint-disable-next-line import/no-webpack-loader-syntax
 mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
@@ -12,9 +13,12 @@ mapboxgl.accessToken = "pk.eyJ1IjoidHdhYmkiLCJhIjoiY2tlZnZyMWozMHRqdjJzb3k2YzlxZ
 
 var devicesRef = Firebase.database().ref("particle-devices/");
 var cansRef = Firebase.database().ref("Trash-cans/");
+
 const FirebaseContent = () => {
 
-    const [deviceArray, setDeviceArray] = useState([]);
+    const [trashcans, canLoading, error] = useListVals(cansRef);
+    const [particleDevices] = useListVals(devicesRef);
+    //const [deviceArray, setDeviceArray] = useState([]);
     const [canArray, setCanArray] = useState([]);
     const mapContainer = React.useRef(null);
     const [lng, setLng] = useState(35.0168);
@@ -37,14 +41,6 @@ const FirebaseContent = () => {
         setVisible(!visible);
     };
 
-    const getTrashcans = () => {
-        setCanArray([]);
-        cansRef.on("child_added", function (snapshot) {
-            var device = snapshot.val();
-            device.label = device.canName;
-            setCanArray(canArray => [...canArray, device]);
-        });
-    }
 
 
     useEffect(() => {
@@ -56,48 +52,49 @@ const FirebaseContent = () => {
             zoom: zoom
         });
 
-        setDeviceArray([])
-        devicesRef.on("child_added", function (snapshot) {
-            var device = snapshot.val();
-            device.label = device.coreid;
-            setDeviceArray(deviceArray => [...deviceArray, device]);
-        });
-
-        var tempArray = [];
         var geoLocArray = [];
-        setCanArray([]);
-        cansRef.on("child_added", function (snapshot) {
-            var trashCan = snapshot.val();
-            devicesRef.child(trashCan.particleID).on('value', function (snapshot){
-                if(snapshot.exists()){
-                    var particleDevice = snapshot.val();
-                    trashCan.canLevel = particleDevice.distance;
-                }
-            });
-            trashCan.label = trashCan.canName;
-            tempArray.push(trashCan);
-            geoLocArray.push(
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "canName": trashCan.canName,
-                        "canID" : trashCan.canID,
-                        "iconSize": [60, 60],
-                        "canLevel" : trashCan.canLevel,
-                        "particleID" : trashCan.particleID,
-                        "longitude" : trashCan.longitude,
-                        "latitude" : trashCan.latitude
-                    },
-
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [trashCan.longitude, trashCan.latitude]
+        var tempArray = [];
+        if (trashcans){
+            trashcans.map((trashCan) => {
+                trashCan.label = trashCan.canName;
+                devicesRef.child(trashCan.particleID).on('value', function (snapshot){
+                    if(snapshot.exists()){
+                        var particleDevice = snapshot.val();
+                        trashCan.canLevel = particleDevice.distance;
                     }
-                }
-            );
-            setCanArray([...tempArray]);
-        });
+                });
+                trashCan.label = trashCan.canName;
+                tempArray.push(trashCan);
+                geoLocArray.push(
+                    {
+                        "type": "Feature",
+                        "properties": {
+                            "canName": trashCan.canName,
+                            "canID" : trashCan.canID,
+                            "iconSize": [60, 60],
+                            "canLevel" : trashCan.canLevel,
+                            "particleID" : trashCan.particleID,
+                            "longitude" : trashCan.longitude,
+                            "latitude" : trashCan.latitude
+                        },
 
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [trashCan.longitude, trashCan.latitude]
+                        }
+                    }
+                );
+                setCanArray([...tempArray]);
+            });
+        }
+        
+        if(particleDevices){
+            particleDevices.map((device) => {
+                device.label = device.coreid;
+            })
+            
+        }
+        
         map.on('move', () => {
             setLng(map.getCenter().lng.toFixed(4));
             setLat(map.getCenter().lat.toFixed(4));
@@ -165,7 +162,7 @@ const FirebaseContent = () => {
 
 
         return () => map.remove();
-    }, []);
+    }, [particleDevices, trashcans]);
 
 
     const handleNewTrashcan = () => {
@@ -181,14 +178,22 @@ const FirebaseContent = () => {
 
             var canID = canName + "-" + selectedDevice.coreid;
 
+            var object = {
+                'canName': canName,
+                'latitude': latitude,
+                'longitude': longitude,
+                'canID' : canID,
+                'canLevel': selectedDevice.level,
+                'particleID' : selectedDevice.coreid
+            }
+
+
             cansRef.child(canID)
-                .set({'canName': canName, 'latitude': latitude, 'longitude': longitude, 'canID' : canID,
-                    'canLevel': selectedDevice.distance, 'particleID' : selectedDevice.coreid})
+                .set(object)
                 .then(() => {
                     alert("Trash-can added successfully");
                     setLoading(false);
                     handleModal();
-                    getTrashcans();
                 })
                 .catch((error) => {
                     alert("Unable to add trash-can due to an error: " + error);
@@ -223,7 +228,6 @@ const FirebaseContent = () => {
                     alert("Trash-can edited successfully");
                     setLoading(false);
                     handleModal();
-                    getTrashcans();
                 })
                 .catch((error) => {
                     alert("Unable to edit trash-can due to an error: " + error);
@@ -376,7 +380,7 @@ const FirebaseContent = () => {
                                     className="w-100"
                                     placeholder="select particle device on trash-can"
                                     onChange={handleDevice}
-                                    options={deviceArray}
+                                    options={particleDevices}
                                 />
                             </div>: null}
 
@@ -419,10 +423,13 @@ const FirebaseContent = () => {
                                     <b className=" h6 float-left grey-text">TRASH-CANS</b>
                                 </Col>
                                 <Col span={6}>
-                                    <Button style={{float: "right", marginLeft: "auto", marginRight: 30 }} className="d-flex justify-content-center"
-                                            type="primary" onClick={() => {setShowEdit(false); handleModal();}}>
-                                        <PlusOutlined/>
-                                    </Button>
+                                    <div className="d-flex flex-row">
+                                        <Button style={{float: "right", marginRight: 4 }} className="d-flex justify-content-center"
+                                                type="primary" onClick={() => {setShowEdit(false); handleModal();}}>
+                                            <PlusOutlined/>
+                                        </Button>
+                                    </div>
+
                                 </Col>
                             </Row>
 
